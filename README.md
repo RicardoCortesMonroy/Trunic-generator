@@ -3,14 +3,14 @@
 A Streamlit web app that converts English text into Trunic, a writing system from the game _TUNIC_, using phonetic transcription.
 
 **[(Link to Web App)](https://trunic-generator.streamlit.app/)**
-![Web app screenshot](docs\web_app_screenshot.png)
+![Web app screenshot](docs/web_app_screenshot.png)
 
 ## About
 
 This simple web app takes English text, converts it into phonetic form, and maps the sounds to Trunic - a writing system from the game _TUNIC_. The phonetics are all derived from American English pronunciation, similar to the text found in the in-game manual.
 
 The following diagram explains the system in detail.
-![Diagram explaining the Trunic writing system](docs\trunic_guide.png)
+![Diagram explaining the Trunic writing system](docs/trunic_guide.png)
 _credit: https://tunic.wiki/books/secrets/page/trunic_
 
 This repository exists mainly for transparency, issue reporting, and source availability. Most users should use the live web app.
