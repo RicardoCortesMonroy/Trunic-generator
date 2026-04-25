@@ -71,7 +71,7 @@ st.markdown(f"""
 )
 
 # English input text
-english = st.text_area("English", value="Hello, World!")
+english = st.text_area("Input:", value="Hello, World!")
 
 # Trunic formatting options
 strikethrough_enabled = st.checkbox("Strikethrough", True)
