@@ -40,6 +40,12 @@ streamlit run src/app.py
 
 Please note that the project has a dependency on the open-source `espeak-ng` software, the installation of which will vary depending on your platform.
 
+### Font
+
+There are two fonts generated in this project (under the `fonts/` folder) that are used in the output box of the web app to render the Trunic glyphs correctly. These are `Trunic-Regular.ttf` and `Trunic-Strikethrough.ttf`, the only difference being the strikethrough in the latter which is more in line with the in-game text.
+
+If you wish to copy and paste the web app output, please note that the glyphs will only be rendered correctly using either of these two fonts. To install them, simply download the .ttf file, right click, and click "Install". They can then be used in any text-editing software.
+
 ## Credits
 
 Uses Streamlit, phonemizer, fontParts, ufo2ft, and eSpeak NG.
