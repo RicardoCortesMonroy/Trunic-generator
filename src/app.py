@@ -6,11 +6,19 @@ from pathlib import Path
 BASE_DIR = Path(__file__).parent.parent
 
 def get_url(font_name: Path) -> str:
+    """Get source url for direct font injection into HTML style tag"""
     ttf_path = BASE_DIR / "font" / f"{font_name}.ttf"
     with open(ttf_path, "rb") as f:
         b64 = base64.b64encode(f.read()).decode()
     return f'data:font/truetype;base64,{b64}'
 
+@st.cache_data
+def english_to_trunic_cache(text):
+    """Wrapper for english_to_trunic function with data cache for Streamlit"""
+    return english_to_trunic(text)
+
+
+# Page Title
 st.markdown(f"""
     <style>
     @font-face {{
@@ -62,8 +70,10 @@ st.markdown(f"""
     unsafe_allow_html=True
 )
 
+# English input text
 english = st.text_area("English", value="Hello, World!")
 
+# Trunic formatting options
 strikethrough_enabled = st.checkbox("Strikethrough", True)
 with st.container(horizontal=True, vertical_alignment="center"):
     st.write("Font size")
@@ -76,15 +86,12 @@ with st.container(horizontal=True, vertical_alignment="center"):
         width = 130
     )
 
-@st.cache_data
-def english_to_trunic_cache(text):
-    return english_to_trunic(text)
-
 glyph_unicode_list = english_to_trunic_cache(english)
 unicode_text = ''.join([c if not isinstance(c,int) else f"&#x{c:x}" for c in glyph_unicode_list])
 
 font_family = "Trunic-Strikethrough" if strikethrough_enabled else "Trunic-Regular"
 
+# Trunic output box
 st.markdown(f"""
     <div style="
         font-family: {font_family}, serif;
@@ -97,6 +104,20 @@ st.markdown(f"""
         min-height: 80px;
     ">
         {unicode_text}
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+# Link to repo
+st.markdown(f"""
+    <div style="
+        font-size: 12px;
+        font-style: italic;
+        color: #c0c0c0;
+    ">
+        <br>
+        Source Code: <a href="https://github.com/RicardoCortesMonroy/trunic-glyph-generator">trunic-glyph-generator</a>
     </div>
     """,
     unsafe_allow_html=True
