@@ -53,7 +53,7 @@ st.markdown(f"""
     <div style="
         font-family: {font_family}, serif;
         font-size: {font_size}px;
-        line-height: 1.2;
+        line-height: 1.0;
         letter-spacing: 0.0em;
         padding: 1rem;
         border: 1px solid #ccc;

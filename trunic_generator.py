@@ -59,10 +59,11 @@ consonants = {
 def normalize_ipa(raw_ipa_text:str)->str:
     ipa = raw_ipa_text
 
-    # Delaisons
+    # Deliaisons
     ipa = ipa.replace('wʌzɐ', 'wʌz ɐ')
     ipa = ipa.replace('fɚɹə', 'fɚɹ ə')
     ipa = re.sub('əvə ', 'əv ə ', ipa)
+    ipa = re.sub(r'(?:(?<=^)|(?<=[\s\,\.\!\?]))aɪɐm($|[\s\,\.\!\?])', r'aɪ æm\1', ipa)
     ipa = re.sub(r'(?<=\S)ðə([\s\,\.\!\?])', r' ðə\1', ipa)
 
     # Dippthong replacements
@@ -110,10 +111,10 @@ def convert_to_normalized_ipa(text: str) -> str:
         backend="espeak",
         preserve_punctuation=True,
     )
-    # print(f"raw: {ipa}")
+    print(f"raw: {ipa}")
     ipa = normalize_ipa(ipa)
     ipa = ipa.replace(',,', ' - ')
-    # print(f"normalized: {ipa}")
+    print(f"normalized: {ipa}")
 
     return ipa
 
