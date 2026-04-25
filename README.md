@@ -2,7 +2,7 @@
 
 A Streamlit web app that converts English text into Trunic, a writing system from the game _TUNIC_, using phonetic transcription.
 
-**[Link to Web App](https://trunic-glyph-generator.streamlit.app/)**
+<a href="https://trunic-glyph-generator.streamlit.app/" target="_blank">Link to Web App</a>
 ![Web app screenshot](docs/web_app_screenshot.png)
 
 ## About
