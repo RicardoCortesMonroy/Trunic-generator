@@ -137,7 +137,7 @@ def english_to_trunic(text:str) -> list:
     syllable_names = []
     cur = 0
 
-    with open(BASE_DIR / "unicode_mapping.json","r") as f:
+    with open(BASE_DIR / "Data" / "unicode_mapping.json","r") as f:
         unicode_mapping = json.loads(f.read())
 
     while cur < len(ipa):
