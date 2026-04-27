@@ -62,14 +62,15 @@ consonants = {
     "_"   : 0b0000000000000
 }
 
+
 def word_replace(text:str, target:str, repl:str) -> str:
-    return re.sub(rf'(?:(?<=^)|(?<=[\s\,\.\!\?])){target}($|[\s\,\.\!\?])', rf'{repl}\1', text)
+    punctuation_pattern = "\n\s\,\.\!\?\[\]\{\}\(\)"
+    return re.sub(rf'(?:(?<=^)|(?<=[{punctuation_pattern}])){target}($|[{punctuation_pattern}])', rf'{repl}\1', text)
 
 def normalize_ipa(raw_ipa_text:str)->str:
     ipa = raw_ipa_text
 
     # Dippthong replacements
-    # ipa = ipa.replace('ɚɹ','ʊɹ')
     ipa = ipa.replace('ɜːɹ','ɜː')
     ipa = ipa.replace('ɔɹ','ʊɹ')
     ipa = ipa.replace('ɔːɹ','ʊɹ')
@@ -84,10 +85,10 @@ def normalize_ipa(raw_ipa_text:str)->str:
     ipa = ipa.replace('ɚ','ɜː') # e.g. "general"
     ipa = re.sub(r'ɔ(?!ɪ)', r'ɑː', ipa)
     ipa = re.sub(r'i(?!ː)', r'iː', ipa)
-    # ipa = re.sub(r'ɚ(?!ɹ)', r'ɜː', ipa)
 
     # # Deliaisons
     ipa = re.sub(rf'(?:(?<=^)|(?<=[\s\,\.\!\?]))nɑːtɜː ɹ', 'nɑːt ə ɹ', ipa)
+    ipa = word_replace(ipa,'wən', 'wɑːn')
     ipa = word_replace(ipa,'aʊtəv', 'aʊt əv')
     ipa = word_replace(ipa,'nɑːtə', 'nɑːt ə')
     ipa = word_replace(ipa,'əvə', 'əv ə')
@@ -118,6 +119,7 @@ def extract_next_phoneme(string:str, start:int)->str:
 
 def convert_to_normalized_ipa(text: str) -> str:
     # Preprocessing
+    text = text.replace('\n','[,]')
     text = text.replace(' – ',',,')
     text = text.replace(' - ',',,')
 
@@ -128,8 +130,9 @@ def convert_to_normalized_ipa(text: str) -> str:
         preserve_punctuation=True,
     )
     print(f"raw: {ipa}")
-    ipa = normalize_ipa(ipa)
+    ipa = ipa.replace('[,]', '\n')
     ipa = ipa.replace(',,', ' - ')
+    ipa = normalize_ipa(ipa)
     print(f"normalized: {ipa}")
 
     return ipa
@@ -173,7 +176,6 @@ def english_to_trunic(text:str, minimise_inversions:bool=False) -> list:
             and phoneme_1 in vowels \
             and phoneme_2 in consonants \
             and phoneme_3 in vowels
-        # print(f"{word_cur}:{phoneme_1}, vowel_start: {vowel_only}")
 
         # Full syllable identified
         if not vowel_only and syllable_name in unicode_mapping:
@@ -181,7 +183,6 @@ def english_to_trunic(text:str, minimise_inversions:bool=False) -> list:
             word_cur += len(syllable_name)
             
             syllable_unicode = unicode_mapping.get(syllable_name)
-            # print(f"  Chosen glyph: {syllable_name}")
             syllables.append(syllable_unicode)
             syllable_names.append(syllable_name)
 
@@ -191,7 +192,6 @@ def english_to_trunic(text:str, minimise_inversions:bool=False) -> list:
             word_cur += len(phoneme_1)
 
             syllable_unicode = unicode_mapping.get(phoneme_1)
-            # print(f"  Chosen glyph: {phoneme_1}")
             syllables.append(syllable_unicode)
             syllable_names.append(phoneme_1)
 
@@ -199,6 +199,9 @@ def english_to_trunic(text:str, minimise_inversions:bool=False) -> list:
         else:
             cur += len(phoneme_1)
             word_cur += len(phoneme_1)
+
+            if phoneme_1 == '\n':
+                phoneme_1 = '<br>'
 
             syllables.append(phoneme_1)
             syllable_names.append(phoneme_1)
