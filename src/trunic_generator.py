@@ -80,7 +80,7 @@ with open(BASE_DIR / "Data" / "word_substitutions.json","r", encoding="utf-8") a
         word_substitutions = json.loads(f.read())
 
 # re_sep = "\n\s\,\.\!\?\[\]\{\}\(\)\""
-re_sep = "[\W\n\s]"
+re_sep = r"[\W\n\s]"
 def word_replace(text:str, target:str, repl:str) -> str:
     return re.sub(rf'(?:(?<=^)|(?<={re_sep})){target}($|{re_sep})', rf'{repl}\1', text)
 
@@ -90,7 +90,8 @@ def normalize_ipa(raw_ipa_text:str)->str:
     # Substring replacements
     ipa = re.sub(rf'ifəl(?={re_sep})', r'ɪfəl', ipa) # e.g. beautiful
 
-    # Dippthong replacements
+    # Dippthong/syllable replacements
+    ipa = ipa.replace('ʔn̩','ən')
     ipa = ipa.replace('ɜːɹ','ɜː')
     ipa = ipa.replace('ɔɹ','ʊɹ')
     ipa = ipa.replace('ɔːɹ','ʊɹ')
@@ -111,7 +112,8 @@ def normalize_ipa(raw_ipa_text:str)->str:
     for target, substitution in word_substitutions.items():
         ipa = word_replace(ipa, target, substitution)
     ipa = re.sub(rf'(?:(?<=^)|(?<=[\s\,\.\!\?]))nɑːtɜː ɹ', 'nɑːt ə ɹ', ipa) # e.g. not a rare
-    ipa = re.sub(r'(?<=\S)ðə([\s\,\.\!\?])', r' ðə\1', ipa)
+    ipa = re.sub(rf'(?<=\w)wəz({re_sep})', r' wəz\1', ipa)
+    ipa = re.sub(rf'(?<=\w)ðə({re_sep})', r' ðə\1', ipa)
 
     # Punctuation spacing
     ipa = re.sub(r'(\s)([\.\,\!\%\)])',r'\2\1', ipa)
