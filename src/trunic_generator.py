@@ -62,32 +62,58 @@ consonants = {
     "_"   : 0b0000000000000
 }
 
+numbers = {
+    "0": 0b1000000000000,
+    "1": 0b0001000000000,
+    "2": 0b0010100000000,
+    "3": 0b0011100000000,
+    "4": 0b0010110100000,
+    "5": 0b0011110100000,
+    "6": 0b0010110111000,
+    "7": 0b0011110111000,
+    "8": 0b0010110111011,
+    "9": 0b0011110111011
+}
+
+
+with open(BASE_DIR / "Data" / "word_substitutions.json","r", encoding="utf-8") as f:
+        word_substitutions = json.loads(f.read())
+
+# re_sep = "\n\s\,\.\!\?\[\]\{\}\(\)\""
+re_sep = r"[\W\n\s]"
+def word_replace(text:str, target:str, repl:str) -> str:
+    return re.sub(rf'(?:(?<=^)|(?<={re_sep})){target}($|{re_sep})', rf'{repl}\1', text)
+
 def normalize_ipa(raw_ipa_text:str)->str:
     ipa = raw_ipa_text
 
-    # Deliaisons
-    ipa = ipa.replace('wʌzɐ', 'wʌz ɐ')
-    ipa = ipa.replace('fɚɹə', 'fɚɹ ə')
-    ipa = re.sub('əvə ', 'əv ə ', ipa)
-    ipa = re.sub(r'(?:(?<=^)|(?<=[\s\,\.\!\?]))aɪɐm($|[\s\,\.\!\?])', r'aɪ æm\1', ipa)
-    ipa = re.sub(r'(?<=\S)ðə([\s\,\.\!\?])', r' ðə\1', ipa)
+    # Substring replacements
+    ipa = re.sub(rf'ifəl(?={re_sep})', r'ɪfəl', ipa) # e.g. beautiful
 
-    # Dippthong replacements
-    ipa = ipa.replace('ɾ','t')
-    ipa = ipa.replace('ɚɹ','ʊɹ')
+    # Dippthong/syllable replacements
+    ipa = ipa.replace('ʔn̩','ən')
     ipa = ipa.replace('ɜːɹ','ɜː')
     ipa = ipa.replace('ɔɹ','ʊɹ')
     ipa = ipa.replace('ɔːɹ','ʊɹ')
     ipa = ipa.replace('ɔː','ɑː')
-    ipa = ipa.replace('ɹɹ','ɹ')
     
     # Monothong replacements
+    ipa = ipa.replace('ɾ','t')
+    ipa = ipa.replace('ɹɹ','ɹ')
     ipa = ipa.replace('ʌ','ə')
     ipa = ipa.replace('ɐ','ə')
     ipa = ipa.replace('ᵻ','ə')
+    ipa = ipa.replace('ɚɹ','ɜː') # e.g. numerous
+    ipa = ipa.replace('ɚ','ɜː') # e.g. general
     ipa = re.sub(r'ɔ(?!ɪ)', r'ɑː', ipa)
     ipa = re.sub(r'i(?!ː)', r'iː', ipa)
-    ipa = re.sub(r'ɚ(?!ɹ)', r'ɜː', ipa)
+
+    ## Post-normalized word replacements and de-liaisons
+    for target, substitution in word_substitutions.items():
+        ipa = word_replace(ipa, target, substitution)
+    ipa = re.sub(rf'(?:(?<=^)|(?<=[\s\,\.\!\?]))nɑːtɜː ɹ', 'nɑːt ə ɹ', ipa) # e.g. not a rare
+    ipa = re.sub(rf'(?<=\w)wəz({re_sep})', r' wəz\1', ipa)
+    ipa = re.sub(rf'(?<=\w)ðə({re_sep})', r' ðə\1', ipa)
 
     # Punctuation spacing
     ipa = re.sub(r'(\s)([\.\,\!\%\)])',r'\2\1', ipa)
@@ -104,61 +130,99 @@ def extract_next_phoneme(string:str, start:int)->str:
     for phoneme in vowels.keys():
         if string[start:].startswith(phoneme):
             return phoneme
+    for phoneme in numbers.keys():
+        if string[start:].startswith(phoneme):
+            return phoneme
     return string[start]
 
 def convert_to_normalized_ipa(text: str) -> str:
-    # Preprocessing
-    text = text.replace(' – ',',,')
-    text = text.replace(' - ',',,')
+
+    dont_phonemize = "1234567890,.–-(){}[]<>/\\%!?*^:;`¬|\n!\"°#~+£$&"
 
     ipa = phonemize(
         text,
         language="en-us",
         backend="espeak",
         preserve_punctuation=True,
+        punctuation_marks=dont_phonemize
     )
     print(f"raw: {ipa}")
     ipa = normalize_ipa(ipa)
-    ipa = ipa.replace(',,', ' - ')
     print(f"normalized: {ipa}")
 
     return ipa
 
-def english_to_trunic(text:str) -> list:
+def english_to_trunic(
+        text:str,
+        minimise_inversions:bool=False,
+        convert_numbers:bool=True
+    ) -> list:
     """
     Takes English text and converts it into a list of unicode characters (or punctuation)
     to be rendered in HTML with one of the Trunic fonts. The phonemes used to create the 
     Trunic glyphs are based on American English pronunciation.
+
+    Setting `deinvert` to True will attempt to minimise inverted glyph chains to make words
+    easier to read. This works by ensuring any instance of VCV is rendered as V-CV instead of VC-V.
+    For example, "anemones" may be easier to read if it starts with the "a" glyph by itself
     """
 
     ipa = convert_to_normalized_ipa(text)
     
     syllables = []
-    syllable_names = []
     cur = 0
 
-    with open(BASE_DIR / "unicode_mapping.json","r") as f:
+    with open(BASE_DIR / "Data" / "unicode_mapping.json","r", encoding="utf-8") as f:
         unicode_mapping = json.loads(f.read())
 
     while cur < len(ipa):
         phoneme_1 = extract_next_phoneme(ipa, cur)
+
+        if phoneme_1 == ' ':
+            syllables.append(' ')
+            cur += 1
+            continue
+        elif phoneme_1 in numbers:
+            if convert_numbers:
+                syllable = unicode_mapping[phoneme_1]
+            else:
+                syllable = phoneme_1
+            syllables.append(syllable)
+            cur += 1
+            continue
+
         phoneme_2 = extract_next_phoneme(ipa, cur + len(phoneme_1))
+        phoneme_3 = extract_next_phoneme(ipa, cur + len(phoneme_1)+ len(phoneme_2))
         syllable_name = f"{phoneme_1}{phoneme_2}"
 
+        # Start with a vowel-only glyph if the word starts with <vowel><cons><vowel>
+        # This helps prevent chains of inversions which make words harder to read
+        vowel_only = minimise_inversions \
+            and phoneme_1 in vowels \
+            and phoneme_2 in consonants \
+            and phoneme_3 in vowels
+
         # Full syllable identified
-        if syllable_unicode := unicode_mapping.get(syllable_name):
+        if not vowel_only and syllable_name in unicode_mapping:
             cur += len(syllable_name)
+            
+            syllable_unicode = unicode_mapping.get(syllable_name)
             syllables.append(syllable_unicode)
-            syllable_names.append(syllable_name)
+
         # Only next phoneme has a mapping
-        elif syllable_unicode := unicode_mapping.get(phoneme_1):
+        elif phoneme_1 in unicode_mapping:
             cur += len(phoneme_1)
+
+            syllable_unicode = unicode_mapping.get(phoneme_1)
             syllables.append(syllable_unicode)
-            syllable_names.append(phoneme_1)
+
         # Next phoneme is not a mappable object, render it literally
         else:
             cur += len(phoneme_1)
+
+            if phoneme_1 == '\n':
+                phoneme_1 = '<br>'
+
             syllables.append(phoneme_1)
-            syllable_names.append(phoneme_1)
 
     return syllables
