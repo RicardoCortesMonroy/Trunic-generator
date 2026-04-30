@@ -128,12 +128,12 @@ div[data-testid="stLayoutWrapper"]
 
 outer = st.columns(3)
 
-def set_checkbox(col, label:str, info:str=''):
+def set_checkbox(col, label:str, value:bool=False, info:str=''):
     with col:
         c1, c2 = st.columns(2)
 
         with c1:
-            var = st.checkbox(label)
+            var = st.checkbox(label,value=value)
         
         if info == '':
             return var
@@ -151,9 +151,9 @@ def set_checkbox(col, label:str, info:str=''):
         
         return var
 
-strikethrough_enabled = set_checkbox(outer[0], "Strikethrough")
-minimise_inversions = set_checkbox(outer[1], "Minimise inversions", "Prevents adjacent inverted glyph characters that may make certain words harder to read\ne.g. &quot;anemone&quot;, &quot;aluminum&quot;, &quot;biohazard&quot;")
-convert_numbers = set_checkbox(outer[2], "Convert numbers", "Converts numbers into custom glyphs (credit to github.com/dirdam)")
+strikethrough_enabled = set_checkbox(outer[0], "Strikethrough", value=True)
+minimise_inversions = set_checkbox(outer[1], "Minimise inversions", info="Prevents adjacent inverted glyph characters that may make certain words harder to read\ne.g. &quot;anemone&quot;, &quot;aluminum&quot;, &quot;biohazard&quot;")
+convert_numbers = set_checkbox(outer[2], "Convert numbers", info="Converts numbers into custom glyphs (credit to github.com/dirdam)")
 
 
 col1, col2 = st.columns(2)
