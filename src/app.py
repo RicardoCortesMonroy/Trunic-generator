@@ -12,7 +12,7 @@ def get_url(font_name: Path) -> str:
         b64 = base64.b64encode(f.read()).decode()
     return f'data:font/truetype;base64,{b64}'
 
-# @st.cache_data
+@st.cache_data
 def english_to_trunic_cache(*args, **kwargs):
     """Wrapper for english_to_trunic function with data cache for Streamlit"""
     return english_to_trunic(*args, **kwargs)
@@ -73,41 +73,8 @@ st.markdown(f"""
 # English input text
 english = st.text_area("Input:", value="Hello, World!")
 
-# Trunic formatting options
-# col1, col2, col3 = st.columns([0.3,0.4,0.4])
-# with col1:
-#     strikethrough_enabled = st.checkbox("Strikethrough", True)
 
-# with col2:
-#     col_a, col_b = st.columns([0.6,0.1])
-#     with col_a:
-#         minimise_inversions = st.checkbox("Minimise inversions", False)
-#     with col_b:
-#         st.markdown(
-#             """
-#             <div style="position:absolute;top:9px">
-#                 <span title="Prevents adjacent inverted glyph characters that may make certain words harder to read\ne.g. &quot;anemone&quot;, &quot;aluminum&quot;, &quot;biohazard&quot;">
-#                 ⓘ
-#                 </span>
-#             </div>
-#             """,
-#             unsafe_allow_html=True
-#         )
-# with col3:
-#     col_a, col_b = st.columns([0.6,0.1], gap="xxsmall")
-#     with col_a:
-#         convert_numbers = st.checkbox("Convert numbers", False)
-#     with col_b:
-#         st.markdown(
-#             """
-#             <div style="position:absolute;top:9px;">
-#                 <span title="Converts numbers into custom glyphs (credit to github.com/dirdam)">
-#                 ⓘ
-#                 </span>
-#             </div>
-#             """,
-#             unsafe_allow_html=True
-#         )
+# Output formatting options
 st.markdown("""
 <style>
 

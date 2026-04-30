@@ -13,9 +13,13 @@ The following diagram explains the system in detail.
 ![Diagram explaining the Trunic writing system](docs/trunic_guide.png)
 _credit: https://tunic.wiki/books/secrets/page/trunic_
 
-This repository exists mainly for transparency, issue reporting, and source availability. Most users should use the live web app.
+Optionally, you can also convert digits into a custom set of glyphs. Otherwise, digits will show up as standard arabic numerals.
+![Set of arabic numerals as Trunic glyphs](docs/trunic_digits.png)
+_credit: https://github.com/dirdam_
 
-You may also run the jupyter notebook locally if you wish to modify or extend any of the code.
+There is also an option for preventing chains of inverted glyphs in words such as "anemone" or "biohazard" - this may make them easier to read. It works by rendering all vowel-consonant-vowel sequences as `(vowel)-(consontant-vowel)` instead of `(vowel-consonant)-(vowel)`, where the parentheses denote a syllable represented by a single glyph.
+
+Lastly, feel free to run the jupyter notebook locally if you wish to modify or extend any of the code.
 
 ## Bug Reports / Feedback
 
@@ -52,6 +56,8 @@ Uses Streamlit, phonemizer, fontParts, ufo2ft, and eSpeak NG.
 
 Inspired by the writing system in TUNIC by Isometricorp Games.
 Unofficial fan project.
+
+Credit to dirdam on Github for designing the numbered glyphs.
 
 ## License
 
